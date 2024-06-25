@@ -1,0 +1,63 @@
+-- @path MM=/metamodo_diagrama_clase_uml_peliculas/metamodelado/metamodelo_simplificado_diagrama_clase_peliculas.ecore
+-- @path MM1=/metamodelo_entidad_relacion/metamodelo/metamodelo_entidad_relacion.ecore
+
+module diagramaclaseentidadrelacion;
+create OUT : MM1 from IN : MM;
+
+rule Package2Schema {
+	from
+		entrada : MM!Package
+	to
+		salida : MM1!Schema (
+			name <- entrada.name,
+			table <- entrada.Class
+		)
+}
+rule Class2Table {
+	from
+		entrada : MM!Class
+	to
+		salida : MM1!Table (
+			name <- entrada.name,
+			pkey <- primaryKeyColumn,
+			column <- entrada.attribute ->append(salida.pkey) ,
+			
+			foreingkey <- entrada.attribute -> select(e | e.EsRelacion())
+			
+			
+		),
+		 primaryKeyColumn: MM1!Column (
+			name <- 'id',
+			type <- 'Integer'
+		)
+		
+}
+rule Attribute2Column {
+	from
+		entrada : MM!Attribute(not entrada.EsRelacion())
+	to
+		salida : MM1!Column (
+			name <- entrada.name,
+			type <- entrada.clasifier.name
+			
+		)
+			
+}
+
+rule Attribute2Foreinkey {
+	from
+		 entrada : MM!Attribute(entrada.EsRelacion())
+	to
+		 salida : MM1!ForeingKey (
+		 	refs <- MM1!Table.allInstances()->select(e | e.name.toLower() = entrada.clasifier.name.toLower()),
+			fkey <- salida.refs.column->select(e | e.name = 'id')
+		)
+}
+
+
+helper context MM!Attribute def: EsRelacion(): Boolean =
+	if self.clasifier.oclIsTypeOf(MM!Class) then
+		true
+	else
+		false
+	endif;

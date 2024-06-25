@@ -1,0 +1,81 @@
+modeltype UML "strict"uses MetamodeloSimplificadoUMLPeliculas('http://metamodelo_simplificado_uml_peliculas.ecore');
+modeltype ER "strict" uses MetamodeloEntidadRelacion('http://metamodelo-entidad-relacion.ecore');
+
+transformation QVTDiagraclas2Schema(in entrada:UML, out salida:ER);
+main() {
+	entrada.objects()[Package]-> map Package2Schema();
+	entrada.objects()[Class]-> map Class2Table2Foreignkey();
+	
+}
+mapping UML::Package:: Package2Schema() : ER::Schema {
+	name := self.name;
+	table := self.Class->map Class2Table();
+}
+mapping UML::Class:: Class2Table() : ER::Table  {
+	name := self.name;
+	column := self.attribute->map Attribute2Column();
+	
+	-- agregar primarykey
+	var tmp_column_pkey := self.map Class2PrimaryKey();
+	pkey := tmp_column_pkey;
+	column += tmp_column_pkey;
+	
+	-- agregar foreingkey
+	//foreingkey := self.attribute->map Attribute2Foreignkey();	
+		
+}
+
+mapping UML::Attribute:: Attribute2Column() : ER::Column
+	when {self.clasifier.oclIsTypeOf(PrimitiveDataType)} {
+	name := self.name;
+	type := self.clasifier.name;
+}
+
+mapping Class::Class2PrimaryKey() : Column {
+	name := 'id';
+	type := 'Integer'
+}
+
+// cambios soporte varias relaciones independiente del orden (Foreignkey)
+mapping UML::Class:: Class2Table2Foreignkey() : ER::Table  {
+	 
+	//init{
+	//	salida.objects()[Table]->forEach(t){
+	//		if(t.name.equalsIgnoreCase(self.name)){
+	//			result := t;
+	//		};
+	//	};
+	//}
+
+    init{
+    	var existing = ER::Table.allInstances()->selectOne(t | t.name = self.name);
+	    if (existing <> null) {
+	         result := existing;
+	    }else{
+	    	result := object ER::Table {
+	            name := self.name;
+	        };
+	    };
+    }
+	-- agregar foreingkey
+	foreingkey := self.attribute->map Attribute2Foreignkey();
+		
+}
+mapping UML::Attribute:: Attribute2Foreignkey() : ER::ForeingKey
+	when {self.clasifier.oclIsTypeOf(Class)} {
+
+	salida.objects()[Table]->forEach(t){
+		if(t.name.equalsIgnoreCase(self.clasifier.name)){
+			t.column ->forEach(c){
+				if(c.name.equalsIgnoreCase('id')){
+					log('tabla:' + t.name + ' column: ' + c.name);
+					fkey:= c;
+					refs:=t;
+	
+				}
+			}	
+		}
+	}
+	
+}
+

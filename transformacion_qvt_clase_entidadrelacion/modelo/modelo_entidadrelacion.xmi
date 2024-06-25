@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MetamodeloEntidadRelacion:Schema xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:MetamodeloEntidadRelacion="http://metamodelo-entidad-relacion.ecore" xsi:schemaLocation="http://metamodelo-entidad-relacion.ecore ../../metamodelo_entidad_relacion/metamodelo/metamodelo_entidad_relacion.ecore" name="peliculas">
+  <table name="Pelicula" pkey="//@table.0/@column.3">
+    <column name="nombre" type="String"/>
+    <column name="url" type="String"/>
+    <column name="estado" type="Boolean"/>
+    <column name="id" type="Integer"/>
+    <foreingkey fkey="//@table.5/@column.2" refs="//@table.5"/>
+  </table>
+  <table name="Reserva" pkey="//@table.1/@column.2">
+    <column name="fecha" type="Float"/>
+    <column name="costo" type="Float"/>
+    <column name="id" type="Integer"/>
+    <foreingkey fkey="//@table.2/@column.3" refs="//@table.2"/>
+    <foreingkey fkey="//@table.0/@column.3" refs="//@table.0"/>
+  </table>
+  <table name="Usuario" pkey="//@table.2/@column.3">
+    <column name="identificacion" type="String"/>
+    <column name="nombres" type="String"/>
+    <column name="apellidos" type="String"/>
+    <column name="id" type="Integer"/>
+    <foreingkey fkey="//@table.4/@column.3" refs="//@table.4"/>
+  </table>
+  <table name="Pago" pkey="//@table.3/@column.4">
+    <column name="numero" type="String"/>
+    <column name="fecha" type="Date"/>
+    <column name="monto" type="Float"/>
+    <column name="estado" type="String"/>
+    <column name="id" type="Integer"/>
+    <foreingkey fkey="//@table.1/@column.2" refs="//@table.1"/>
+  </table>
+  <table name="TipoIdentificacion" pkey="//@table.4/@column.3">
+    <column name="codigo" type="String"/>
+    <column name="nombre" type="String"/>
+    <column name="descripcion" type="String"/>
+    <column name="id" type="Integer"/>
+  </table>
+  <table name="Admin" pkey="//@table.5/@column.2">
+    <column name="usuario" type="String"/>
+    <column name="clave" type="String"/>
+    <column name="id" type="Integer"/>
+    <foreingkey fkey="//@table.2/@column.3" refs="//@table.2"/>
+  </table>
+</MetamodeloEntidadRelacion:Schema>

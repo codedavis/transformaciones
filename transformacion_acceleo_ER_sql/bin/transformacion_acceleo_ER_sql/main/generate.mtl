@@ -1,0 +1,47 @@
+[comment encoding = UTF-8 /]
+[module generate('http://metamodelo-entidad-relacion.ecore')]
+
+
+[template public generateElement(esquema : Schema)]
+[comment @main/]
+[file (esquema.name.toLower() + '.sql', false, 'UTF-8')]
+[GenerarSQLTablas(esquema)/]
+[/file]
+[/template]
+[comment Generar insert tablas/]
+[template public GenerarSQLTablas(esquema:Schema)]
+[for(tabla:Table | esquema.table) separator('\n')]
+CREATE TABLE [tabla.name/](
+	[GenerarSQLColumns(tabla)/]
+	[GenerarSQLForeingKey(tabla)/]
+	[GenerarSQLPrimaryKey(tabla)/]
+);
+[/for]
+[/template]
+[comment Generar insert columns/]
+[template public GenerarSQLColumns(tabla:Table)]
+[for(columna:Column | tabla.column)]
+[if (columna.type->notEmpty())]
+	[if (columna.type.equalsIgnoreCase('string'))]
+		[columna.name/] Text NOT NULL,
+	[else]
+		[columna.name/] [columna.type/] NOT NULL,
+	[/if]
+[else]
+	[columna.name/] Text NOT NULL,
+[/if]
+[/for]
+[/template]
+[comment Generar foreingKey/]
+[template public GenerarSQLForeingKey(tabla:Table)]
+[for(foreingkey:ForeingKey | tabla.foreingkey) separator('\n')]
+[foreingkey.refs.name.toLower()/] [foreingkey.fkey.type/] NOT NULL,
+CONSTRAINT [foreingkey.refs.name.toLower()/]_fk FOREIGN KEY ([foreingkey.refs.name.toLower()/])
+REFERENCES [foreingkey.refs.name/] ([foreingkey.fkey.name/]),
+[/for]
+[/template]
+[comment Generar primarykey/]
+[template public GenerarSQLPrimaryKey(tabla:Table)]
+CONSTRAINT [tabla.name.toLower()/]_pkey PRIMARY KEY ([tabla.pkey.name/])
+[/template]
+
